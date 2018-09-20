@@ -1,0 +1,15 @@
+<script>
+  import client from '../utils/feathers.js'
+  export default {
+    oncreate() {
+      const { session } = this.store.get()
+      const { id } = session
+      this.attendances = client.service('attendances').watch()
+        .find({ query: { session: id } })
+        .subscribe(res => this.store.set({ attendances: res.data }))
+    },
+    ondestroy() {
+      this.attendances.unsubscribe()
+    },
+  }
+</script>

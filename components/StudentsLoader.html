@@ -1,0 +1,14 @@
+<script>
+  import client from '../utils/feathers.js'
+  export default {
+    oncreate() {
+      const { session } = this.store.get()
+      this.students = client.service('students').watch()
+        .find({ query: { group: session.studentGroupId } })
+        .subscribe(res => this.store.set({ students: res.data }))
+    },
+    ondestroy() {
+      this.students.unsubscribe()
+    },
+  }
+</script>

@@ -1,0 +1,62 @@
+<h1>Log in</h1>
+
+<form on:submit="handleSubmit(event)">
+  <fieldset>
+    <label for="usernameField">Username</label>
+    <input type="text" id="usernameField" bind:value=username>
+    <label for="passwordField">Password</label>
+    <input type="password" id="passwordField" bind:value=password>
+    <br>
+    <input class="button" type="submit" value="Log in" id="loginButton">
+    <br>
+    <span class="error">{error}</span>
+  </fieldset>
+</form>
+
+
+<style>
+  input[type="text"],
+  input[type="password"] {
+    max-width: 30rem;
+  }
+
+  .error {
+    color: red;
+  }
+</style>
+
+<script>
+  import client from "../utils/feathers";
+
+  export default {
+    data() {
+      return {
+        username: "",
+        password: "",
+        error: ""
+      };
+    },
+    methods: {
+      handleSubmit(event) {
+        event.target.querySelector("input[type=submit]").disabled = true;
+        event.preventDefault();
+        const { username, password } = this.get();
+        return client
+          .authenticate({
+            strategy: "local",
+            username,
+            password
+          })
+          .then(res => {
+            console.log(res)
+            this.set({ username: "", password: "" })
+          })
+          .catch(error => {
+            console.log(error)
+            event.target.querySelector("input[type=submit]").disabled = false;
+            this.set({ error: error.message });
+          });
+      }
+    }
+  };
+</script>

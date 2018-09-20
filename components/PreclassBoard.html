@@ -1,0 +1,139 @@
+<div class="wrapper">
+
+  <div class="sidebar">
+    <h2>
+      {$group.name} class
+    </h2>
+    {#if $presentStudents.length}
+    <ul class="here">
+      <h3>Here</h3>
+      {#each $presentStudents as student (student.id)}
+      <li>{student.englishName}</li>
+      {/each}
+    </ul>
+    {/if}
+
+    {#if $absentStudents.length}
+    <ul class="nothere">
+      <h3>Not here</h3>
+      {#each $absentStudents as student (student.id)}
+      <li>{student.englishName}</li>
+      {/each}
+    </ul>
+    {/if}
+  </div>
+
+  <div class="middle" class:late="timeDiff < 0" class:now="!diffMinutes">
+    <p class="currenttime">It's <span class="time">{timeString}</span></p>
+    <p class="starttime">
+      {#if timeDiff > 1000}
+      {diffMinutes ? diffMinutes + " minutes and " : ''} {diffSeconds} seconds to go
+      {:elseif diffMinutes < 1} Time for Class! {:else } {diffMinutes} minutes late {/if} </p> {#if
+        $absentStudents.length===$students.length} <p>None of the
+        {toWords($students.length)} students have arrived yet.</p>
+    {:elseif $presentStudents.length === $students.length}
+    <p>All {toWords($students.length)} students are here!</p>
+    {:else}
+    <p>{numPresent}/{$students.length} of the students are here.</p>
+
+    {/if}
+  </div>
+</div>
+
+<style>
+  .wrapper {
+    margin: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .sidebar {
+    width: 30rem;
+  }
+
+  ul {
+    padding: 1rem;
+  }
+
+  .sidebar h3 {
+    font-size: 6rem;
+    color: var(--base-color);
+    text-decoration: underline;
+  }
+
+  li {
+    font-size: 5rem;
+    margin: 0;
+    list-style-type: none;
+  }
+
+  .middle {
+    text-align: center;
+    flex-grow: 1;
+    align-content: center;
+    font-size: 7rem;
+    color: #efefef;
+    padding-top: 20vh
+  }
+
+  .currenttime {
+    font-size: 9rem;
+  }
+
+  span.time {
+    color: var(--primary-color);
+    font-size: 12rem;
+  }
+
+  .late .time,
+  .late .starttime {
+    color: red;
+  }
+
+  .now .time,
+  .now .starttime {
+    color: greenyellow;
+  }
+</style>
+
+<script>
+  import client from '../utils/feathers.js'
+  import { format } from 'date-fns/esm'
+  import { toWords } from 'number-to-words'
+
+  // get the students
+  export default {
+    oncreate() {
+      const { session } = this.store.get()
+      this.students = client.service('students').watch()
+        .find({ query: { group: session.studentGroupId } })
+        .subscribe(res => this.store.set({ students: res.data }))
+      this.interval = setInterval(() => {
+        this.set({ time: new Date() })
+      }, 1000);
+    },
+    ondestroy() {
+      this.students.unsubscribe()
+      clearInterval(this.interval)
+    },
+    data() {
+      return {
+        time: new Date()
+      }
+    },
+    computed: {
+      timeString: ({ time }) => format(time, 'p'),
+      timeDiff: ({ time, $session }) => {
+        const startTime = new Date($session.startsAt)
+        return startTime.getTime() - time.getTime()
+      },
+      diffSeconds: ({ timeDiff }) => Math.floor(Math.abs((timeDiff / 1000) % 60)),
+      diffMinutes: ({ timeDiff }) => Math.floor(Math.abs(timeDiff / 60000)),
+      numPresent: ({ $attendances }) => $attendances.filter(attendance => attendance.status === "present").length
+    },
+    helpers: {
+      toWords
+    }
+  }
+</script>

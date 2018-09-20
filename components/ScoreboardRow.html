@@ -1,0 +1,82 @@
+<div class="row">
+  <div class="name">{student.englishName || student.chineseName}</div>
+  <div class="points">
+    {#each pointsRange as index (index)}
+    <div in:fly='{x: 400}' out:fade>
+      <Star {index} />
+    </div>
+    {/each}
+  </div>
+
+</div>
+
+<style>
+  .row {
+    border-top: 1px solid #050505;
+    border-bottom: 1px solid #050505;
+    border-collapse: collapse;
+  }
+
+  .name {
+    font-size: 8rem;
+    width: 50rem;
+    padding: 1rem;
+    line-height: 110%;
+  }
+
+  .points {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+  }
+</style>
+
+<script>
+  import { fly, fade } from 'svelte-transitions'
+  import client from '../utils/feathers.js'
+
+  export default {
+    transitions: { fly, fade },
+    components: {
+      Star: './Star.html'
+    },
+    data() {
+      return {
+        points: []
+      }
+    },
+    oncreate() {
+      const { student } = this.get()
+
+      const { session } = this.store.get()
+      this.points = client.service("points").watch()
+        .find({ query: { studentId: student.id, classSessionId: session.id } })
+        .subscribe(res => {
+          const latest = (res.data.slice(-1)[0])
+          if (latest && latest.value > 0) {
+            const yay = new Audio("ui-confirmation-alert-a5min.wav");
+            yay.play()
+          }
+          if (latest && latest.value < 0) {
+            const boo = new Audio("quick-fart.wav");
+            boo.play()
+          }
+          this.set({ points: res.data })
+        })
+    },
+    ondestroy() {
+      this.points.unsubscribe()
+    },
+    computed: {
+      pointsTally: ({ points }) => !points.length
+        ? 0
+        : points.reduce(((tally, point) => tally + point.value), 0),
+      pointsRange: ({ points }) => {
+        const tally = !points.length ? 0 : points.reduce(((tally, point) => tally + point.value), 0)
+        return tally <= 0 ? [] : [...Array(tally).keys()]
+      }
+    }
+  }
+</script>

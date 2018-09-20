@@ -1,0 +1,42 @@
+<svelte:head>
+  <title>{$APPNAME} - viewer</title>
+</svelte:head>
+
+{#if !$login}
+<h1>Welcome to {$APPNAME}</h1>
+<Login></Login>
+
+{:else}
+
+<h2>{$APPNAME}</h2>
+
+<SessionLoader />
+{#if $session}
+<GroupLoader />
+<StudentsLoader />
+<AttendancesLoader />
+
+{#if $session.stage ==="Active" && $group}
+<PreclassBoard />
+{:else}
+<Scoreboard />
+{/if}
+
+{:else}
+<h3>No active lessons at the moment.</h3>
+{/if}
+{/if}
+
+<script>
+  export default {
+    components: {
+      Login: "../components/Login.html",
+      SessionLoader: "../components/SessionLoader.html",
+      StudentsLoader: "../components/StudentsLoader.html",
+      AttendancesLoader: "../components/AttendancesLoader.html",
+      GroupLoader: "../components/GroupLoader.html",
+      PreclassBoard: "../components/PreclassBoard.html",
+      Scoreboard: "../components/Scoreboard.html"
+    }
+  };
+</script>
