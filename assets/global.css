@@ -8,11 +8,16 @@ mostly the addition of custom property colors, so that components can use them t
  * Copyright (c) 2018 CJ Patoilo
  * Licensed under the MIT license
  */
-
 body,
 html {
-  overflow-x: hidden;
-  overflow-y: auto;
+  padding: 0;
+  margin: 0;
+}
+#sapper {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
 }
 :root {
   --primary-color: #5f4b8b;
@@ -34,7 +39,6 @@ html {
 }
 
 body {
-  margin: 1rem;
   color: var(--base-color);
   background-color: var(--background);
   /* font-family: "Roboto Slab", "Helvetica Neue", "Helvetica", "Arial", sans-serif; */

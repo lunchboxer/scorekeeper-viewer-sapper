@@ -1,12 +1,19 @@
 <script>
-  import client from '../utils/feathers.js'
+  import client from "../utils/feathers.js";
   export default {
     oncreate() {
-      client.service("class-sessions").watch()
-        .find({ query: { stage: { $in: ['Active', 'Started'] } } })
-        .subscribe(res => {
-          this.store.set({ session: res.data[0] })
+      client
+        .service("class-sessions")
+        .watch()
+        .find({
+          query: {
+            stage: { $in: ["Active", "Started", "Ended"] },
+            $sort: { endsAt: -1 }
+          }
         })
+        .subscribe(res => {
+          this.store.set({ session: res.data[0] });
+        });
     }
-  }
+  };
 </script>

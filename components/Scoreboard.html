@@ -1,6 +1,7 @@
-{#if $presentStudents && $presentStudents.length}
-<!-- we don't actually use these players, just preload the audio -->
 <div class="scoreboard">
+  {#if $presentStudents && $presentStudents.length}
+  <!-- we don't actually use these players, just preload the audio -->
+
   <audio preload>
     <source type='audio/wav' src='ui-confirmation-alert-a5min.wav'>
   </audio>
@@ -10,14 +11,15 @@
   {#each $presentStudents as student (student.id)}
   <ScoreboardRow {student} />
   {/each}
-</div>
-{/if}
 
-{#if $absentStudents && $absentStudents.length}
-<div class="absent-list">
-  <span class="head">Not here:&nbsp;</span><span class="names">{joinedAbsent}</span>
+  {/if}
+
+  {#if $absentStudents && $absentStudents.length}
+  <div class="absent-list">
+    <span class="head">Not here:&nbsp;</span><span class="names">{joinedAbsent}</span>
+  </div>
+  {/if}
 </div>
-{/if}
 
 <style>
   .absent-list {

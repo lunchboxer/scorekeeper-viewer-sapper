@@ -1,0 +1,168 @@
+<div class="results">
+  {#if sortedPoints}
+  {#each sortedPoints as group, i}
+  {#if i === 0}
+  <div class="winner">
+    <p class="big"><span class="rank">#1&nbsp;</span>
+      <span class="names">
+        {group.students.map(s => s.englishName).join(', ')}
+      </span>
+    </p>
+
+    {#each pointsRange(group.total) as point}
+    <div class="star" style="--speed: 2000ms;">
+      <Star index={point} size="100px" />
+    </div>
+
+    {/each}
+    <p>{group.total} points</p>
+  </div>
+  {:else}
+  <p>#{i + 1} - {group.total} points - {group.students.map(s => s.englishName).join(', ')}</p>
+  {/if}
+  {/each}
+  {/if}
+</div>
+
+<style>
+  div.star {
+    display: inline-flex;
+    -webkit-animation-name: spin;
+    -webkit-animation-duration: var(--speed);
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+    -moz-animation-name: spin;
+    -moz-animation-duration: var(--speed);
+    -moz-animation-iteration-count: infinite;
+    -moz-animation-timing-function: linear;
+    -ms-animation-name: spin;
+    -ms-animation-duration: var(--speed);
+    -ms-animation-iteration-count: infinite;
+    -ms-animation-timing-function: linear;
+
+    animation-name: spin;
+    animation-duration: var(--speed);
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+  }
+
+  @-ms-keyframes spin {
+    from {
+      -ms-transform: rotate(0deg);
+    }
+
+    to {
+      -ms-transform: rotate(360deg);
+    }
+  }
+
+  @-moz-keyframes spin {
+    from {
+      -moz-transform: rotate(0deg);
+    }
+
+    to {
+      -moz-transform: rotate(360deg);
+    }
+  }
+
+  @-webkit-keyframes spin {
+    from {
+      -webkit-transform: rotate(0deg);
+    }
+
+    to {
+      -webkit-transform: rotate(360deg);
+    }
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  div.results {
+    padding: 0 3rem;
+    text-align: center;
+  }
+
+  p {
+    font-size: 6rem;
+    margin-bottom: 0.4rem;
+  }
+
+  div.winner {
+    border: 3px solid var(--primary-color);
+    padding: 2rem 0;
+    margin: 4rem 0;
+    width: auto;
+    text-align: center;
+    border-radius: 3rem;
+  }
+
+  .big {
+    font-size: 8rem;
+    margin: 0;
+  }
+</style>
+
+<script>
+  import client from "../utils/feathers";
+  export default {
+    components: {
+      Star: './Star.html'
+    },
+    data() {
+      return {
+        points: []
+      };
+    },
+    oncreate() {
+      const { session } = this.store.get();
+      client
+        .service("points")
+        .find({ query: { classSessionId: session.id, $limit: 500 } })
+        .then(res => {
+          this.set({ points: res.data });
+        });
+    },
+    computed: {
+      sortedPoints: ({ points, $students }) => {
+        if (!points.length || !$students) return null;
+        const pointsByStudent = points.reduce((groups, point) => {
+          const student = point.studentId;
+          groups[student] = groups[student] || 0;
+          groups[student] += point.value;
+          return groups;
+        }, {});
+        const groupedByPoints = Object.keys(pointsByStudent).reduce(
+          (acc, studentId) => {
+            const student = $students.find(s => {
+              return s.id == parseInt(studentId)
+            })
+            const points = pointsByStudent[studentId];
+            acc[points] = acc[points] || [];
+            acc[points].push(student);
+            return acc;
+          },
+          {}
+        );
+        const sortedpoints = Object.keys(groupedByPoints).sort((a, b) => b - a);
+        const sortedgroups = sortedpoints.map((point, i) => {
+          return { total: parseInt(point), students: groupedByPoints[point] };
+        });
+        return sortedgroups;
+      }
+    },
+    helpers: {
+      pointsRange(points) {
+        return points <= 0 ? [] : [...Array(points).keys()]
+      }
+    }
+  };
+</script>

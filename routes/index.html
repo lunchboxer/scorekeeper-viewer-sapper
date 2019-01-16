@@ -7,9 +7,6 @@
 <Login></Login>
 
 {:else}
-
-<h2>{$APPNAME}</h2>
-
 <SessionLoader />
 {#if $session}
 <GroupLoader />
@@ -18,8 +15,10 @@
 
 {#if $session.stage ==="Active" && $group}
 <PreclassBoard />
-{:else}
+{:elseif $session.stage === "Started" && $group}
 <Scoreboard />
+{:else}
+<ResultsBoard />
 {/if}
 
 {:else}
@@ -36,7 +35,8 @@
       AttendancesLoader: "../components/AttendancesLoader.html",
       GroupLoader: "../components/GroupLoader.html",
       PreclassBoard: "../components/PreclassBoard.html",
-      Scoreboard: "../components/Scoreboard.html"
+      Scoreboard: "../components/Scoreboard.html",
+      ResultsBoard: "../components/ResultsBoard.html"
     }
   };
 </script>
