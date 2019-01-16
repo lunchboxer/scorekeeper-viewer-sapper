@@ -10,6 +10,7 @@ mostly the addition of custom property colors, so that components can use them t
  */
 body,
 html {
+  overflow:hidden;
   padding: 0;
   margin: 0;
 }
