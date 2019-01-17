@@ -27,6 +27,9 @@
 {/if}
 
 <script>
+  import client from "../utils/feathers";
+  import store from "../utils/store.js";
+
   export default {
     components: {
       Login: "../components/Login.html",
@@ -37,6 +40,23 @@
       PreclassBoard: "../components/PreclassBoard.html",
       Scoreboard: "../components/Scoreboard.html",
       ResultsBoard: "../components/ResultsBoard.html"
+    },
+    store: () => store,
+    oncreate() {
+      client.authenticate().catch({ login: null, user: null });
+      client.on("authenticated", this.authenticatedListener);
+      client.on("logout", this.logoutListener);
+    },
+    methods: {
+      async authenticatedListener(res) {
+        store.set({ login: res.accessToken });
+        const payload = await client.passport.verifyJWT(res.accessToken);
+        const user = await client.service("users").get(payload.userId);
+        store.set({ user });
+      },
+      logoutListener() {
+        store.set({ user: null, login: null });
+      }
     }
   };
 </script>

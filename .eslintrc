@@ -1,3 +1,6 @@
 {
-  "extends": "standard"
+  "plugins": [
+    "html",
+    "@tivac/svelte"
+  ]
 }

@@ -1,23 +1,45 @@
 <div>
-  <label for={name}>{label}</label>
-  {#if error}
+  <label for="{name}">{label}</label> {#if error}
   <div class="error-message">{error}</div>
   {/if}
 </div>
 <!--  can't have dynamic type attribute and two-way value binding on one input -->
 {#if type === 'text'}
-<input type='text' {name} {pattern} {minlength} {maxlength} {required} aria-describedby={descriptionId} on:input="checkValidity()"
-  on:invalid="invalidHandler(event)" class:error="error" on:focus="set({showDescription: !showDescription})" on:blur="set({showDescription: !showDescription})"
-  bind:value ref:input />
+<input
+  type="text"
+  {name}
+  {pattern}
+  {minlength}
+  {maxlength}
+  {required}
+  aria-describedby="{descriptionId}"
+  on:input="checkValidity()"
+  on:invalid="invalidHandler(event)"
+  class:error="error"
+  on:focus="set({showDescription: !showDescription})"
+  on:blur="set({showDescription: !showDescription})"
+  bind:value
+  ref:input
+/>
 {:elseif type === 'password'}
-<input type='password' {name} {pattern} {minlength} {maxlength} {required} aria-describedby={descriptionId} on:input="checkValidity()"
-  on:invalid="invalidHandler(event)" class:error="error" on:focus="set({showDescription: !showDescription})" on:blur="set({showDescription: !showDescription})"
-  bind:value ref:input />
-{/if}
-{#if description && showDescription}
-<div id={descriptionId} class="description">
-  {description}
-</div>
+<input
+  type="password"
+  {name}
+  {pattern}
+  {minlength}
+  {maxlength}
+  {required}
+  aria-describedby="{descriptionId}"
+  on:input="checkValidity()"
+  on:invalid="invalidHandler(event)"
+  class:error="error"
+  on:focus="set({showDescription: !showDescription})"
+  on:blur="set({showDescription: !showDescription})"
+  bind:value
+  ref:input
+/>
+{/if} {#if description && showDescription}
+<div id="{descriptionId}" class="description">{description}</div>
 {/if}
 
 <style>
@@ -28,7 +50,7 @@
 
   .error {
     border-color: red;
-    background-color: #FEE;
+    background-color: #fee;
   }
 
   .description {
@@ -46,7 +68,7 @@
   .description:before {
     position: absolute;
     z-index: 99;
-    content: '';
+    content: "";
     left: 10px;
     top: -4px;
     border-style: solid;
@@ -65,25 +87,25 @@
     data() {
       return {
         showDescription: false,
-        error: ''
-      }
+        error: ""
+      };
     },
     computed: {
       descriptionId: ({ name }) => `description${name}`
     },
     methods: {
       invalidHandler(event) {
-        event.preventDefault()
-        this.checkValidity()
+        event.preventDefault();
+        this.checkValidity();
       },
       checkValidity() {
-        const input = this.refs.input
+        const input = this.refs.input;
         if (!input.validity.valid && input.validationMessage) {
-          this.set({ error: input.validationMessage })
+          this.set({ error: input.validationMessage });
         } else {
-          this.set({ error: '' })
+          this.set({ error: "" });
         }
       }
     }
-  }
+  };
 </script>
