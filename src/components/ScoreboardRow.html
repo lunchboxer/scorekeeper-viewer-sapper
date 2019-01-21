@@ -1,9 +1,14 @@
 <div class="row">
   <div class="name">{student.englishName || student.chineseName}</div>
   <div class="points">
-    {#each pointsRange as index (index)}
+    {#each pointGroups as group (group)}
+    <div in:fly='{x: -400}' out:fade>
+      <Star number={groupLength * (group + 1)} {size} group=true index={group} />
+    </div>
+    {/each}
+    {#each singleStars as point (point)}
     <div in:fly='{x: 400}' out:fade>
-      <Star {index} size="10rem" />
+      <Star index={point + pointGroups.length} {size} number={point + pointGroups.length * groupLength + 1} />
     </div>
     {/each}
   </div>
@@ -44,12 +49,13 @@
     },
     data() {
       return {
-        points: []
+        points: [],
+        groupLength: 10,
+        size: '7rem'
       }
     },
     oncreate() {
       const { student } = this.get()
-
       const { session } = this.store.get()
       this.points = client.service("points").watch()
         .find({ query: { studentId: student.id, classSessionId: session.id } })
@@ -73,9 +79,12 @@
       pointsTally: ({ points }) => !points.length
         ? 0
         : points.reduce(((tally, point) => tally + point.value), 0),
-      pointsRange: ({ points }) => {
-        const tally = !points.length ? 0 : points.reduce(((tally, point) => tally + point.value), 0)
-        return tally <= 0 ? [] : [...Array(tally).keys()]
+      singleStars: ({ pointsTally, groupLength }) => pointsTally <= 0
+        ? []
+        : [...Array(pointsTally % groupLength).keys()],
+      pointGroups: ({ pointsTally, groupLength }) => {
+        const groupCount = Math.floor(pointsTally / groupLength)
+        return groupCount === 0 ? [] : [...Array(groupCount).keys()]
       }
     }
   }
